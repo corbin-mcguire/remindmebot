@@ -14,7 +14,7 @@ const commands = [
     .setName("remindme")
     .setDescription("Reminds you after a specified amount of time!")
     .addNumberOption((option) =>
-      option.setName("time").setDescription("The time value").setMinValue(1).setRequired(true)
+      option.setName("time").setDescription("The time value").setMinValue(1).setRequired(true),
     )
     .addStringOption((option) =>
       option
@@ -22,14 +22,14 @@ const commands = [
         .setDescription("The unit of time")
         .setRequired(true)
         .addChoices(
-          { name: "seconds", value: "seconds" },
           { name: "minutes", value: "minutes" },
           { name: "hours", value: "hours" },
-          { name: "days", value: "days" }
-        )
+          { name: "days", value: "days" },
+          { name: "months", value: "months" },
+        ),
     )
     .addStringOption((option) =>
-      option.setName("message").setDescription("The message you'd like to remind yourself of").setRequired(true)
+      option.setName("message").setDescription("The message you'd like to remind yourself of").setRequired(true),
     ),
 ];
 

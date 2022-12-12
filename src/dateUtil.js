@@ -1,9 +1,6 @@
 export function createDate(time, unit) {
   let date = new Date();
   switch (unit) {
-    case "seconds":
-      date.setSeconds(date.getSeconds() + time);
-      break;
     case "minutes":
       date.setMinutes(date.getMinutes() + time);
       break;
@@ -12,6 +9,9 @@ export function createDate(time, unit) {
       break;
     case "days":
       date.setDate(date.getDay() + time);
+      break;
+    case "months":
+      date.setMonth(date.getMonth() + time);
       break;
     default:
       break;
