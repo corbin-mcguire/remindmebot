@@ -26,12 +26,7 @@ export function add(reminder) {
       reminders: [reminder],
     };
 
-    fs.writeFile(fileUrl, JSON.stringify(remindersJson), (err) => {
-      if (err) console.error("Error writing to file", err);
-      FILE_LOCKED = false;
-    });
-
-    FILE_LOCKED = false;
+    writeReminderFile(fileUrl, remindersJson);
   } else {
     fs.readFile(fileUrl, (err, data) => {
       if (err) {
@@ -44,18 +39,40 @@ export function add(reminder) {
       const remindersJson = JSON.parse(data);
       remindersJson.reminders.push(reminder);
 
-      fs.writeFile(fileUrl, JSON.stringify(remindersJson), (err) => {
-        if (err) console.error("Error appending file", err);
-        FILE_LOCKED = false;
-      });
-
-      FILE_LOCKED = false;
+      writeReminderFile(fileUrl, remindersJson);
     });
   }
 }
 
-// TODO: removes a reminder from a file
-export function remove(reminderId) {}
+export function remove(reminderId) {
+  const directoryUrl = new URL("../data", import.meta.url);
+  const fileUrl = new URL(`../data/reminders.json`, import.meta.url);
+
+  if (FILE_LOCKED || !fs.existsSync(directoryUrl)) return;
+
+  fs.readFile(fileUrl, (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    const remindersJson = JSON.parse(data);
+    const reminderIndex = remindersJson.reminders.findIndex((reminder) => reminder.id === reminderId);
+
+    remindersJson.reminders.splice(reminderIndex, 1);
+
+    writeReminderFile(fileUrl, remindersJson);
+  });
+}
 
 // TODO: checks the file for existing reminders
 export function checkReminders() {}
+
+function writeReminderFile(fileUrl, reminders) {
+  FILE_LOCKED = true;
+  fs.writeFile(fileUrl, JSON.stringify(reminders), (err) => {
+    if (err) console.error("Error appending file", err);
+    FILE_LOCKED = false;
+  });
+  FILE_LOCKED = false;
+}
