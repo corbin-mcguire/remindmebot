@@ -1,5 +1,7 @@
 import { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { config } from "dotenv";
+import { createDate } from "./dateUtil.js";
+import { add, checkReminders, Reminder } from "./reminder.js";
 
 config();
 
@@ -11,7 +13,9 @@ const commands = [
   new SlashCommandBuilder()
     .setName("remindme")
     .setDescription("Reminds you after a specified amount of time!")
-    .addNumberOption((option) => option.setName("time").setDescription("The time value").setRequired(true))
+    .addNumberOption((option) =>
+      option.setName("time").setDescription("The time value").setMinValue(1).setRequired(true)
+    )
     .addStringOption((option) =>
       option
         .setName("unit")
@@ -45,6 +49,7 @@ main();
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  checkReminders();
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -53,7 +58,14 @@ client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
   if (interaction.commandName === "remindme") {
-    console.log(interaction.options);
-    await interaction.reply("pong");
+    const time = interaction.options.get("time");
+    const unit = interaction.options.get("unit");
+    const message = interaction.options.get("message");
+    const date = createDate(time.value, unit.value);
+    const reminder = new Reminder(interaction.user.tag, date, message.value);
+
+    add(reminder);
+
+    await interaction.reply(`I'll remind you at ${date.toString()} to ${message.value}`);
   }
 });
