@@ -5,8 +5,10 @@ import { add, checkReminders, Reminder } from "./reminder.js";
 
 config();
 
+const REMINDER_CHECK_INTERVAL_SECONDS = 60;
+
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+export const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.login(process.env.TOKEN);
 
 const commands = [
@@ -14,7 +16,7 @@ const commands = [
     .setName("remindme")
     .setDescription("Reminds you after a specified amount of time!")
     .addNumberOption((option) =>
-      option.setName("time").setDescription("The time value").setMinValue(1).setRequired(true),
+      option.setName("time").setDescription("The time value").setMinValue(1).setRequired(true)
     )
     .addStringOption((option) =>
       option
@@ -25,21 +27,21 @@ const commands = [
           { name: "minutes", value: "minutes" },
           { name: "hours", value: "hours" },
           { name: "days", value: "days" },
-          { name: "months", value: "months" },
-        ),
+          { name: "months", value: "months" }
+        )
     )
     .addStringOption((option) =>
-      option.setName("message").setDescription("The message you'd like to remind yourself of").setRequired(true),
+      option.setName("message").setDescription("The message you'd like to remind yourself of").setRequired(true)
     ),
 ];
 
 async function main() {
   try {
-    console.log("Started refreshing application (/) commands.");
+    console.log(new Date(), "Started refreshing application (/) commands.");
 
     await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
 
-    console.log("Successfully reloaded application (/) commands.");
+    console.log(new Date(), "Successfully reloaded application (/) commands.");
   } catch (error) {
     console.error(error);
   }
@@ -47,13 +49,18 @@ async function main() {
 
 main();
 
+setInterval(() => {
+  console.log(new Date(), "Checking for reminders");
+  checkReminders();
+}, 1000 * REMINDER_CHECK_INTERVAL_SECONDS);
+
 client.on("ready", () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+  console.log(new Date(), `Logged in as ${client.user.tag}!`);
   checkReminders();
 });
 
 client.on("interactionCreate", async (interaction) => {
-  console.log(interaction.user.tag, " used /", interaction.commandName);
+  console.log(new Date(), interaction.user.tag, " used /", interaction.commandName);
 
   if (!interaction.isCommand()) return;
 
@@ -62,7 +69,7 @@ client.on("interactionCreate", async (interaction) => {
     const unit = interaction.options.get("unit");
     const message = interaction.options.get("message");
     const date = createDate(time.value, unit.value);
-    const reminder = new Reminder(interaction.user.tag, date, message.value);
+    const reminder = new Reminder(interaction.user.id, date, message.value);
 
     add(reminder);
 

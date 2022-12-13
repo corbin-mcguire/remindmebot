@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
+import { client } from "./main.js";
 
 export let FILE_LOCKED = false;
 
@@ -59,14 +60,41 @@ export function remove(reminderId) {
     const remindersJson = JSON.parse(data);
     const reminderIndex = remindersJson.reminders.findIndex((reminder) => reminder.id === reminderId);
 
+    console.log(new Date(), "Removing entry", reminderId);
     remindersJson.reminders.splice(reminderIndex, 1);
 
     writeReminderFile(fileUrl, remindersJson);
+    console.log(new Date(), "Entry removed", reminderId);
   });
 }
 
-// TODO: checks the file for existing reminders
-export function checkReminders() {}
+export function checkReminders() {
+  const fileUrl = new URL(`../data/reminders.json`, import.meta.url);
+
+  if (!fs.existsSync(fileUrl)) return;
+
+  return fs.readFile(fileUrl, (err, data) => {
+    if (err) console.error(err);
+    const reminders = JSON.parse(data)?.reminders;
+
+    reminders.forEach((reminder) => {
+      const now = new Date();
+      const reminderDate = new Date(reminder.date);
+
+      if (reminderDate <= now) {
+        sendReminder(reminder, "reminders");
+        setTimeout(() => {
+          remove(reminder.id);
+        }, 500);
+      }
+    });
+  });
+}
+
+export function sendReminder(reminder) {
+  const channel = client.channels.cache.get("1052026975755173938");
+  channel.send(`<@${reminder.owner}> ${reminder.message}`);
+}
 
 function writeReminderFile(fileUrl, reminders) {
   FILE_LOCKED = true;
