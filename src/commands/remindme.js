@@ -33,7 +33,7 @@ const commandHandler = async (interaction) => {
 
   add(reminder);
 
-  await interaction.reply(`I'll remind you at ${date.toString()} to ${message.value}`);
+  await interaction.reply({ content: `I'll remind you at ${date.toString()} to ${message.value}`, ephemeral: true });
 };
 
 export const remindme = new Command("remindme", command, commandHandler);

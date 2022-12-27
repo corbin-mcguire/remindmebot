@@ -82,8 +82,7 @@ export function checkReminders() {
 }
 
 export function sendReminder(reminder) {
-  const channel = client.channels.cache.get("1052026975755173938");
-  channel.send(`<@${reminder.owner}> ${reminder.message}`);
+  client.users.send(reminder.owner, `<@${reminder.owner}> ${reminder.message}`);
 }
 
 function writeReminderFile(fileUrl, reminders) {
