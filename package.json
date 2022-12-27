@@ -5,8 +5,8 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "start": "node src/main.js",
-    "start:nodemon": "nodemon src/main.js",
+    "serve": "node src/main.js",
+    "serve:dev": "nodemon src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Corbin M.",

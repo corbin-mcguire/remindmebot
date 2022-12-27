@@ -1,17 +1,45 @@
-import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
-import { client } from "./main.js";
+import { client } from "../main.js";
+import { Reminder } from "../models/Reminder.js";
+import { Command } from "../models/Command.js";
+import { createDate } from "../dateUtil.js";
+import { SlashCommandBuilder } from "discord.js";
 
 export let FILE_LOCKED = false;
 
-export class Reminder {
-  constructor(owner, date, message) {
-    this.id = uuidv4();
-    this.owner = owner;
-    this.date = date;
-    this.message = message;
-  }
-}
+const command = new SlashCommandBuilder()
+  .setName("remindme")
+  .setDescription("Reminds you after a specified amount of time!")
+  .addNumberOption((option) => option.setName("time").setDescription("The time value").setMinValue(1).setRequired(true))
+  .addStringOption((option) =>
+    option
+      .setName("unit")
+      .setDescription("The unit of time")
+      .setRequired(true)
+      .addChoices(
+        { name: "minutes", value: "minutes" },
+        { name: "hours", value: "hours" },
+        { name: "days", value: "days" },
+        { name: "months", value: "months" }
+      )
+  )
+  .addStringOption((option) =>
+    option.setName("message").setDescription("The message you'd like to remind yourself of").setRequired(true)
+  );
+
+const commandHandler = async (interaction) => {
+  const time = interaction.options.get("time");
+  const unit = interaction.options.get("unit");
+  const message = interaction.options.get("message");
+  const date = createDate(time.value, unit.value);
+  const reminder = new Reminder(interaction.user.id, date, message.value);
+
+  add(reminder);
+
+  await interaction.reply(`I'll remind you at ${date.toString()} to ${message.value}`);
+};
+
+export const remindme = new Command("remindme", command, commandHandler);
 
 export function add(reminder) {
   if (FILE_LOCKED) return;
