@@ -1,8 +1,8 @@
 import { Client, GatewayIntentBits, REST, Routes } from "discord.js";
 import { config } from "dotenv";
-import { checkReminders } from "./commands/remindme.js";
 import { commandList } from "./commands/commands.js";
 import { handleInteractionCreate } from "./interactions.js";
+import { checkReminders } from "./reminderUtil.js";
 
 config();
 
